@@ -92,7 +92,7 @@ void loop()
        snprintf (msg, 5, "1");
     Serial.print("Publish message: ");
     Serial.println(msg);
-    client.publish("/talli/heppatalli/valokytkin", msg);
+    client.publish("/talli/light", msg);
       
       state = LOW;
     }
@@ -102,7 +102,7 @@ void loop()
        snprintf (msg, 5, "0");
     Serial.print("Publish message: ");
     Serial.println(msg);
-   client.publish("/talli/heppatalli/valokytkin", msg);
+   client.publish("/talli/light", msg);
 
     time1 = millis();
   }
