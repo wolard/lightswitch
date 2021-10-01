@@ -5,9 +5,9 @@
 
 // Update these with values suitable for your network.
 
-const char* ssid = "talli";
-const char* password = "kopo2008";
-const char* mqtt_server = "192.168.0.3";
+const char *ssid = "talli";
+const char *password = "kopo2008";
+const char *mqtt_server = "192.168.0.3";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -41,6 +41,9 @@ WiFi.persistent(true);
   Serial.println(WiFi.localIP());
 }
 
+Bounce debouncer = Bounce();
+int inPin = D1;           // the number of the input pin
+int outPin = LED_BUILTIN; // the number of the output pin
 
 Bounce debouncer = Bounce(); 
 int inPin = D1;      
@@ -64,14 +67,14 @@ boolean reconnect() {
 }
 void setup()
 {
-  pinMode(inPin,  INPUT_PULLUP);
+  pinMode(inPin, INPUT_PULLUP);
   pinMode(outPin, OUTPUT);
     pinMode(rstPin, OUTPUT);
     digitalWrite(rstPin,HIGH);
 
   debouncer.attach(inPin);
   debouncer.interval(5); // interval in ms
- Serial.begin(9600);
+  Serial.begin(9600);
   setup_wifi();
   client.setServer(mqtt_server, 1883);
 }
@@ -79,12 +82,13 @@ void setup()
 void loop()
 {
   //reading = digitalRead(inPin);
- debouncer.update();
- if (!client.connected()) {
+  debouncer.update();
+  if (!client.connected())
+  {
     reconnect();
   }
- 
-    client.loop();
+
+  client.loop();
   // Get the updated value :
   int reading = debouncer.read();
   // if the input just went from LOW and HIGH and we've waited long enough
@@ -92,26 +96,47 @@ void loop()
   // the time
   if (reading == LOW && previous == HIGH)
   {
-    if (state == HIGH){
-       snprintf (msg, 5, "1");
-    Serial.print("Publish message: ");
-    Serial.println(msg);
-    client.publish("/talli/light", msg);
-      
+    if (state == HIGH)
+    {
+      snprintf(msg, 5, "1");
+      Serial.print("Publish message: ");
+      Serial.println(msg);
+      client.publish("/talli/light", msg);
+      snprintf(msg, 5, "ON");
+      client.publish("/talli/lightstatus", msg);
+
       state = LOW;
     }
     else
     {
       state = HIGH;
-       snprintf (msg, 5, "0");
-    Serial.print("Publish message: ");
-    Serial.println(msg);
-   client.publish("/talli/light", msg);
+      snprintf(msg, 5, "0");
+      Serial.print("Publish message: ");
+      Serial.println(msg);
+      client.publish("/talli/light", msg);
+      snprintf(msg, 5, "OFF");
+      client.publish("/talli/lightstatus", msg);
 
-    time1 = millis();
+      time1 = millis();
+    }
   }
+ /*
+  long now = millis();
+  if (now - lastMsg > 2000)
+  {
+    lastMsg = now;
+
+    if (state == HIGH)
+    {
+      client.publish("/talli/lightstatus", "OFF");
+    }
+    else
+    {
+      client.publish("/talli/lightstatus", "ON");
+    }
   }
+  */
   digitalWrite(outPin, state);
-  
+
   previous = reading;
 }
