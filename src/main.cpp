@@ -2,12 +2,14 @@
 #include <Bounce2.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+#include <ESP8266Ping.h>
 
 // Update these with values suitable for your network.
 
-const char *ssid = "talli";
+const char *ssid = "ZyXEL";
 const char *password = "kopo2008";
-const char *mqtt_server = "192.168.0.3";
+const char *mqtt_server = "192.168.1.201";
+const IPAddress remote_ip(192, 168, 1, 201);
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -15,7 +17,10 @@ long lastMsg = 0;
 char msg[50];
 int value = 0;
 int rstPin = D2;  
+
+long now;
 void setup_wifi() {
+
 
   delay(10);
   // We start by connecting to a WiFi network
@@ -24,15 +29,15 @@ void setup_wifi() {
   Serial.println(ssid);
  
     digitalWrite(rstPin,LOW);
-    WiFi.setAutoReconnect(true);
-WiFi.persistent(true);
+  
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
   delay(500);
     Serial.print(".");
   }
-
+  WiFi.setAutoReconnect(true);
+WiFi.persistent(true);
   randomSeed(micros());
 
   Serial.println("");
@@ -41,9 +46,7 @@ WiFi.persistent(true);
   Serial.println(WiFi.localIP());
 }
 
-Bounce debouncer = Bounce();
-int inPin = D1;           // the number of the input pin
-int outPin = LED_BUILTIN; // the number of the output pin
+
 
 Bounce debouncer = Bounce(); 
 int inPin = D1;      
@@ -120,22 +123,20 @@ void loop()
       time1 = millis();
     }
   }
- /*
-  long now = millis();
+ 
+now = millis();
   if (now - lastMsg > 2000)
   {
     lastMsg = now;
-
-    if (state == HIGH)
-    {
-      client.publish("/talli/lightstatus", "OFF");
-    }
-    else
-    {
-      client.publish("/talli/lightstatus", "ON");
-    }
+      if(Ping.ping(remote_ip)) {
+    Serial.println("Success!!");
+  } else {
+    Serial.println("Error :(");
+     digitalWrite(rstPin,HIGH);
   }
-  */
+
+  }
+  
   digitalWrite(outPin, state);
 
   previous = reading;
