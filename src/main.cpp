@@ -14,7 +14,7 @@ PubSubClient client(espClient);
 long lastMsg = 0;
 char msg[50];
 int value = 0;
-
+int rstPin = D2;  
 void setup_wifi() {
 
   delay(10);
@@ -22,11 +22,14 @@ void setup_wifi() {
   Serial.println();
   Serial.print("Connecting to ");
   Serial.println(ssid);
-
+ 
+    digitalWrite(rstPin,LOW);
+    WiFi.setAutoReconnect(true);
+WiFi.persistent(true);
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+  delay(500);
     Serial.print(".");
   }
 
@@ -40,7 +43,8 @@ void setup_wifi() {
 
 
 Bounce debouncer = Bounce(); 
-int inPin = D1;         // the number of the input pin
+int inPin = D1;      
+   // the number of the input pin
 int outPin = LED_BUILTIN;       // the number of the output pin
 
 int state = HIGH;      // the current state of the output pin
@@ -53,17 +57,17 @@ long time1 = 0;           // the last time the output pin was toggled
 unsigned long debounce = 200UL;   // the debounce time, increase if the output flickers
 boolean reconnect() {
   if (client.connect("button1")) {
-    // Once connected, publish an announcement...
-   // client.publish("outTopic","hello world");
-    // ... and resubscribe
-  //  client.subscribe("inTopic2");
+
   }
   return client.connected();
+  
 }
 void setup()
 {
   pinMode(inPin,  INPUT_PULLUP);
   pinMode(outPin, OUTPUT);
+    pinMode(rstPin, OUTPUT);
+    digitalWrite(rstPin,HIGH);
 
   debouncer.attach(inPin);
   debouncer.interval(5); // interval in ms
