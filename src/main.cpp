@@ -28,7 +28,7 @@ void setup_wifi() {
   Serial.print("Connecting to ");
   Serial.println(ssid);
  
-    digitalWrite(rstPin,LOW);
+  
   
   WiFi.begin(ssid, password);
 
@@ -125,14 +125,15 @@ void loop()
   }
  
 now = millis();
-  if (now - lastMsg > 2000)
+  
+  if (now - lastMsg > 5000)
   {
     lastMsg = now;
-      if(Ping.ping(remote_ip)) {
+      if(Ping.ping(remote_ip,1)) {
     Serial.println("Success!!");
   } else {
     Serial.println("Error :(");
-     digitalWrite(rstPin,HIGH);
+     ESP.restart();
   }
 
   }
